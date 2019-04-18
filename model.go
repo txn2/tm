@@ -82,11 +82,11 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 		"index_patterns": []string{account + "-data-" + model.MachineName + "-*"},
 		"settings": es.Obj{
 			"index": es.Obj{
-				"number_of_shards": 2,
+				"number_of_shards": 3,
 			},
 		},
 		"mappings": es.Obj{
-			"_doc": es.Obj{
+			"doc": es.Obj{ // _doc is the standard until deprecated, logstash uses "doc"
 				"_source": es.Obj{
 					"enabled": true,
 				},
