@@ -102,7 +102,7 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 							"properties": payloadProps,
 						},
 					},
-				}.
+				},
 			},
 		},
 	}
