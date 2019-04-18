@@ -57,7 +57,7 @@ func main() {
 	)
 
 	// Search Models
-	server.Router.GET("searchModels/:account",
+	server.Router.POST("searchModels/:account",
 		provision.AccountAccessCheckHandler(false),
 		tmApi.SearchModelsHandler,
 	)
