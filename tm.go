@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/txn2/ack"
@@ -53,8 +54,8 @@ func NewApi(cfg *Config) (*Api, error) {
 		})
 	}
 
-	// send index mappings for models
-	err := a.SendEsMapping(GetModelMapping())
+	// send template mappings for models index
+	_, _, err := a.SendEsMapping(GetModelsTemplateMapping())
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ type ModelResult struct {
 }
 
 // SetupModelIndexTemplate
-func (a *Api) SendEsMapping(mapping es.IndexTemplate) error {
+func (a *Api) SendEsMapping(mapping es.IndexTemplate) (int, es.Result, error) {
 
 	a.Logger.Info("Sending template",
 		zap.String("type", "SendEsMapping"),
@@ -79,15 +80,15 @@ func (a *Api) SendEsMapping(mapping es.IndexTemplate) error {
 	code, esResult, err := a.Elastic.PutObj(fmt.Sprintf("_template/%s", mapping.Name), mapping.Template)
 	if err != nil {
 		a.Logger.Error("Got error sending template", zap.Error(err))
-		return err
+		return code, esResult, err
 	}
 
 	if code != 200 {
 		a.Logger.Error("Got code", zap.Int("code", code), zap.String("EsResult", esResult.ResultType))
-		return errors.New("Error setting up " + mapping.Name + " template, got code " + string(code))
+		return code, esResult, errors.New("Error setting up " + mapping.Name + " template, got code " + string(code))
 	}
 
-	return err
+	return code, esResult, err
 }
 
 // GetModel
@@ -139,6 +140,12 @@ func (a *Api) GetModelHandler(c *gin.Context) {
 func (a *Api) UpsertModel(account string, model *Model) (int, es.Result, error) {
 	a.Logger.Info("Upsert model record", zap.String("account", account), zap.String("machine_name", model.MachineName))
 
+	// send template mappings for models index
+	code, templateMappingResult, err := a.SendEsMapping(MakeModelTemplateMapping(account, model))
+	if err != nil {
+		return code, templateMappingResult, err
+	}
+
 	return a.Elastic.PutObj(fmt.Sprintf("%s-%s/_doc/%s", account, IdxModel, model.MachineName), model)
 }
 
@@ -156,6 +163,12 @@ func (a *Api) UpsertModelHandler(c *gin.Context) {
 		a.Logger.Error("Upsert failure.", zap.Error(err))
 		return
 	}
+
+	// ensure lowercase machine name
+	model.MachineName = strings.ToLower(model.MachineName)
+
+	//ak.GinSend(MakeModelTemplateMapping(account, model))
+	//return
 
 	code, esResult, err := a.UpsertModel(account, model)
 	if err != nil {

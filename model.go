@@ -43,8 +43,76 @@ type Model struct {
 	Fields []Model `json:"fields" mapstructure:"fields"`
 }
 
-// GetModelMapping
-func GetModelMapping() es.IndexTemplate {
+// fieldProps
+func fieldProps(fields []Model) map[string]interface{} {
+	parts := make(map[string]interface{})
+
+	for _, field := range fields {
+		if len(field.Fields) > 0 {
+			parts[field.MachineName] = es.Obj{
+				"type":       field.DataType,
+				"properties": fieldProps(field.Fields),
+			}
+			continue
+		}
+
+		if field.Format != "" {
+			parts[field.MachineName] = es.Obj{
+				"type":   field.DataType,
+				"format": field.Format,
+			}
+			continue
+		}
+
+		parts[field.MachineName] = es.Obj{"type": field.DataType}
+	}
+
+	return parts
+}
+
+// MakeModelTemplateMapping creates a template for modeled data
+// coming in from rxtx.
+func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
+
+	name := account + "-data-" + model.MachineName
+
+	payloadProps := fieldProps(model.Fields)
+
+	template := es.Obj{
+		"index_patterns": []string{account + "-data-" + model.MachineName + "-*"},
+		"settings": es.Obj{
+			"index": es.Obj{
+				"number_of_shards": 2,
+			},
+		},
+		"mappings": es.Obj{
+			"_doc": es.Obj{
+				"_source": es.Obj{
+					"enabled": true,
+				},
+				"properties": es.Obj{
+					"seq":      es.Obj{"type": "long"},
+					"producer": es.Obj{"type": "text"},
+					"key":      es.Obj{"type": "text"},
+					"uuid":     es.Obj{"type": "text"},
+					"label":    es.Obj{"type": "text"},
+					"payload": es.Obj{
+						"type":       "nested",
+						"properties": payloadProps,
+					},
+				},
+			},
+		},
+	}
+
+	return es.IndexTemplate{
+		Name:     name,
+		Template: template,
+	}
+}
+
+// GetModelsTemplateMapping
+func GetModelsTemplateMapping() es.IndexTemplate {
 	properties := es.Obj{
 		"machine_name": es.Obj{
 			"type": "text",
@@ -87,7 +155,9 @@ func GetModelMapping() es.IndexTemplate {
 	template := es.Obj{
 		"index_patterns": []string{"*-" + IdxModel},
 		"settings": es.Obj{
-			"number_of_shards": 2,
+			"index": es.Obj{
+				"number_of_shards": 2,
+			},
 		},
 		"mappings": es.Obj{
 			"_doc": es.Obj{
