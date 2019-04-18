@@ -2,6 +2,15 @@
 
 WIP: TXN2 types model API
 
+## Configuration
+
+Configuration is inherited from [txn2/micro](https://github.com/txn2/micro#configuration). The
+following configuration is specific to **tm**:
+
+| Flag          | Environment Variable | Description                                                |
+|:--------------|:---------------------|:-----------------------------------------------------------|
+| -esServer     | ELASTIC_SERVER       | Elasticsearch Server (default "http://elasticsearch:9200") |
+
 
 ## Examples
 
