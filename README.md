@@ -93,4 +93,4 @@ curl -X POST \
 		}
 	]
 }'
-```bash
+```
