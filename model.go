@@ -90,17 +90,19 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 				"_source": es.Obj{
 					"enabled": true,
 				},
-				"properties": es.Obj{
-					"seq":      es.Obj{"type": "long"},
-					"producer": es.Obj{"type": "text"},
-					"key":      es.Obj{"type": "text"},
-					"uuid":     es.Obj{"type": "text"},
-					"label":    es.Obj{"type": "text"},
-					"rxtxMsg": es.Obj{
-						"type":       "nested",
-						"properties": payloadProps,
+				"rxtxMsg": es.Obj{
+					"properties": es.Obj{
+						"seq":      es.Obj{"type": "long"},
+						"producer": es.Obj{"type": "text"},
+						"key":      es.Obj{"type": "text"},
+						"uuid":     es.Obj{"type": "text"},
+						"label":    es.Obj{"type": "text"},
+						"payload": es.Obj{
+							"type":       "nested",
+							"properties": payloadProps,
+						},
 					},
-				},
+				}.
 			},
 		},
 	}
