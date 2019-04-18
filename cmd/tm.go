@@ -56,6 +56,12 @@ func main() {
 		tmApi.UpsertModelHandler,
 	)
 
+	// Search Models
+	server.Router.GET("searchModels/:account",
+		provision.AccountAccessCheckHandler(false),
+		tmApi.SearchModelsHandler,
+	)
+
 	// run provisioning server
 	server.Run()
 }
