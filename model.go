@@ -96,7 +96,7 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 					"key":      es.Obj{"type": "text"},
 					"uuid":     es.Obj{"type": "text"},
 					"label":    es.Obj{"type": "text"},
-					"payload": es.Obj{
+					"rxtxMsg": es.Obj{
 						"type":       "nested",
 						"properties": payloadProps,
 					},
