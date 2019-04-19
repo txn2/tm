@@ -14,7 +14,6 @@ package tm
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -55,7 +54,7 @@ func NewApi(cfg *Config) (*Api, error) {
 	}
 
 	// send template mappings for models index
-	_, _, err := a.SendEsMapping(GetModelsTemplateMapping())
+	_, _, err := a.Elastic.SendEsMapping(GetModelsTemplateMapping())
 	if err != nil {
 		return nil, err
 	}
@@ -67,28 +66,6 @@ func NewApi(cfg *Config) (*Api, error) {
 type ModelResult struct {
 	es.Result
 	Source Model `json:"_source"`
-}
-
-// SetupModelIndexTemplate
-func (a *Api) SendEsMapping(mapping es.IndexTemplate) (int, es.Result, error) {
-
-	a.Logger.Info("Sending template",
-		zap.String("type", "SendEsMapping"),
-		zap.String("mapping", mapping.Name),
-	)
-
-	code, esResult, err := a.Elastic.PutObj(fmt.Sprintf("_template/%s", mapping.Name), mapping.Template)
-	if err != nil {
-		a.Logger.Error("Got error sending template", zap.Error(err))
-		return code, esResult, err
-	}
-
-	if code != 200 {
-		a.Logger.Error("Got code", zap.Int("code", code), zap.String("EsResult", esResult.ResultType))
-		return code, esResult, errors.New("Error setting up " + mapping.Name + " template, got code " + string(code))
-	}
-
-	return code, esResult, err
 }
 
 // GetModel
@@ -141,7 +118,7 @@ func (a *Api) UpsertModel(account string, model *Model) (int, es.Result, error) 
 	a.Logger.Info("Upsert model record", zap.String("account", account), zap.String("machine_name", model.MachineName))
 
 	// send template mappings for models index
-	code, templateMappingResult, err := a.SendEsMapping(MakeModelTemplateMapping(account, model))
+	code, templateMappingResult, err := a.Elastic.SendEsMapping(MakeModelTemplateMapping(account, model))
 	if err != nil {
 		return code, templateMappingResult, err
 	}
