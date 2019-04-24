@@ -62,7 +62,7 @@ func main() {
 		tmApi.SearchModelsHandler,
 	)
 
-	// run provisioning server
+	// run provisioning tm
 	server.Run()
 }
 

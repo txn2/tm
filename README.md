@@ -114,4 +114,5 @@ goreleaser --skip-publish --rm-dist --skip-validate
 
 Build and release:
 ```bash
-GITHUB_TOKEN=$GITHUB_TOKEN goreleaser --rm-dist
+GITHUB_TOKEN=$GITHUB_TOKEN goreleaser --rm-
+```
