@@ -24,6 +24,18 @@ import (
 	"go.uber.org/zap"
 )
 
+// ModelResult returned from Elastic
+type ModelResult struct {
+	es.Result
+	Source Model `json:"_source"`
+}
+
+// ModelResultAck
+type ModelResultAck struct {
+	ack.Ack
+	Payload ModelResult `json:"payload"`
+}
+
 // Config
 type Config struct {
 	Logger     *zap.Logger
@@ -60,12 +72,6 @@ func NewApi(cfg *Config) (*Api, error) {
 	}
 
 	return a, nil
-}
-
-// ModelResult returned from Elastic
-type ModelResult struct {
-	es.Result
-	Source Model `json:"_source"`
 }
 
 // GetModel
