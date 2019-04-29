@@ -16,16 +16,20 @@ import (
 	"flag"
 	"os"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/txn2/micro"
 	"github.com/txn2/provision"
 	"github.com/txn2/tm"
 )
 
 var (
+	modeEnv          = getEnv("MODE", "protected")
 	elasticServerEnv = getEnv("ELASTIC_SERVER", "http://elasticsearch:9200")
 )
 
 func main() {
+	mode := flag.String("mode", elasticServerEnv, "Protected or internal modes. (internal = security bypass)")
 	esServer := flag.String("esServer", elasticServerEnv, "Elasticsearch Server")
 
 	serverCfg, _ := micro.NewServerCfg("Type Model (tm)")
@@ -41,24 +45,36 @@ func main() {
 		os.Exit(1)
 	}
 
+	accessCheck := func(admin bool) gin.HandlerFunc {
+		return provision.AccountAccessCheckHandler(admin)
+	}
+
+	if *mode == "internal" {
+		accessCheck = func(admin bool) gin.HandlerFunc {
+			return func(c *gin.Context) {}
+		}
+	}
+
 	// User token middleware
-	server.Router.Use(provision.UserTokenHandler())
+	if *mode != "internal" {
+		server.Router.Use(provision.UserTokenHandler())
+	}
 
 	// Get a model
 	server.Router.GET("model/:account/:id",
-		provision.AccountAccessCheckHandler(false),
+		accessCheck(false),
 		tmApi.GetModelHandler,
 	)
 
 	// Upsert a model
 	server.Router.POST("model/:account",
-		provision.AccountAccessCheckHandler(true),
+		accessCheck(true),
 		tmApi.UpsertModelHandler,
 	)
 
 	// Search Models
 	server.Router.POST("searchModels/:account",
-		provision.AccountAccessCheckHandler(false),
+		accessCheck(false),
 		tmApi.SearchModelsHandler,
 	)
 
