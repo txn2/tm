@@ -16,6 +16,8 @@ import (
 	"flag"
 	"os"
 
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/txn2/micro"
@@ -29,7 +31,7 @@ var (
 )
 
 func main() {
-	mode := flag.String("mode", elasticServerEnv, "Protected or internal modes. (internal = security bypass)")
+	mode := flag.String("mode", modeEnv, "Protected or internal modes. (internal = security bypass)")
 	esServer := flag.String("esServer", elasticServerEnv, "Elasticsearch Server")
 
 	serverCfg, _ := micro.NewServerCfg("Type Model (tm)")
@@ -48,6 +50,8 @@ func main() {
 	accessCheck := func(admin bool) gin.HandlerFunc {
 		return provision.AccountAccessCheckHandler(admin)
 	}
+
+	server.Logger.Info("Mode status.", zap.String("mode", *mode))
 
 	if *mode == "internal" {
 		accessCheck = func(admin bool) gin.HandlerFunc {
