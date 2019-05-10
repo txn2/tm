@@ -1,6 +1,12 @@
 ![tm](https://raw.githubusercontent.com/txn2/tm/master/mast.jpg)
+[![tm Release](https://img.shields.io/github/release/txn2/tm.svg)](https://github.com/txn2/tm/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/txn2/tm)](https://goreportcard.com/report/github.com/txn2/tm)
+[![GoDoc](https://godoc.org/github.com/txn2/tm?status.svg)](https://godoc.org/github.com/txn2/tm)
+[![Docker Container Image Size](https://shields.beevelop.com/docker/image/image-size/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
+[![Docker Container Layers](https://shields.beevelop.com/docker/image/layers/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
 
-WIP: TXN2 types model API
+
+TXN2 types model API
 
 ## Configuration
 
