@@ -8,8 +8,8 @@
 The **tm** library defines a type of generic nested meta-data [Model]. The **tm** server creates a services for the storage,
 retrieval and searching of [Model]s associated with a [txn2/provision](https://github.com/txn2/provision) [Account].
 
-A [Model]s consists of a record stored in the Elasticsearch index **ACCOUNT-models** and a corresponding Elasticsearch
-template as **_template/ACCOUNT-data-MODEL** representing the index pattern **ACCOUNT-data-MODEL-\***.
+A [Model] consists of a record stored in the Elasticsearch index **ACCOUNT-models** and a corresponding Elasticsearch
+template (**_template/ACCOUNT-data-MODEL**) representing the index pattern **ACCOUNT-data-MODEL-\***.
 
 [Account]: https://godoc.org/github.com/txn2/provision#Account
 
