@@ -5,13 +5,20 @@
 [![Docker Container Image Size](https://shields.beevelop.com/docker/image/image-size/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
 [![Docker Container Layers](https://shields.beevelop.com/docker/image/layers/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
 
+**tm** is used for defining the strucutre and Elasticsearch indexing rules for [Message]s
+sent to Elasticsearch from [rxtx] through [rtBeat](https://github.com/txn2/rtbeat) with
+the key `rxtxMsg`. **tm** [Model]s define the properties of the [rxtx] `payload`.
+
 The **tm** library defines a type of generic nested meta-data [Model]. The **tm** server creates a services for the storage,
 retrieval and searching of [Model]s associated with a [txn2/provision](https://github.com/txn2/provision) [Account].
 
 A [Model] consists of a record stored in the Elasticsearch index **ACCOUNT-models** and a corresponding Elasticsearch
 template (**_template/ACCOUNT-data-MODEL**) representing the index pattern **ACCOUNT-data-MODEL-\***.
 
+
 [Account]: https://godoc.org/github.com/txn2/provision#Account
+[Message]: https://godoc.org/github.com/txn2/rxtx/rtq#Message
+[rxtx]: https://github.com/txn2/rxtx
 
 ## Configuration
 
