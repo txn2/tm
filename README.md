@@ -13,18 +13,46 @@ TXN2 types model API
 Configuration is inherited from [txn2/micro](https://github.com/txn2/micro#configuration). The
 following configuration is specific to **tm**:
 
-| Flag          | Environment Variable | Description                                                |
-|:--------------|:---------------------|:-----------------------------------------------------------|
-| -esServer     | ELASTIC_SERVER       | Elasticsearch Server (default "http://elasticsearch:9200") |
+| Flag      | Environment Variable | Description                                                    |
+|:----------|:---------------------|:---------------------------------------------------------------|
+| -esServer | ELASTIC_SERVER       | Elasticsearch Server (default "http://elasticsearch:9200")     |
+| -mode     | MODE                 | Protected or internal modes. ("internal" = token check bypass) |
 
+## Routes
+
+| Method | Route Pattern                           | Description                                          |
+|:-------|:----------------------------------------|:-----------------------------------------------------|
+| POST   | [/model/:account](#upsert-model)        | Upset a model into an account.                       |
+| GET    | [/model/:account/:id](#get-model)       | Get a model by account and id.                       |
+| POST   | [searchModels/:account](#search-models) | Search for models in an account with a Lucene query. |
+
+## Local Development
+
+The project includes a Docker Compose file with Elasticsearch, Kibana and Cerebro:
+```bash
+docker-compose up
+```
+
+Run the source in token bypass mode and pointed to Elasticsearch exposed on localhost port 9200:
+```bash
+go run ./cmd/tm.go --mode=internal --esServer=http://localhost:9200
+```
 
 ## Examples
 
-The following creates model called **test** and will result in a record with the id **test** in the **xorg-models** index. A mapping template will be also be generated and stored at **_template/xorg-data-test**:
+The following examples assume mode is set to internal and will not check a Bearer token for
+proper permissions.
+
+#### Upsert Model
+
+Upserting a [Model] will result in an [Ack] with a [Result] payload.
+
+The following creates a model called **test** and will result in a record with the id **test**
+in the **xorg-models** index. A mapping template will be also be generated and stored
+at **_template/xorg-data-test**:
 ```bash
 curl -X POST \
   http://localhost:8080/model/xorg \
-  -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "machine_name": "test",
@@ -103,13 +131,40 @@ curl -X POST \
 				    "group": "",
 				    "parse": false,
 				    "index": 0
-				},				
+				}				
 		    ]
 		}
 	]
 }'
 ```
 
+### Get Model
+
+Getting a [Model] will result in a [ModelResultAck].
+
+```bash
+curl http://localhost:8080/model/xorg/test
+```
+
+### Search Models
+
+Searching for [Model]s will result in a [ModelSearchResultsAck].
+
+```bash
+curl -X POST \
+  http://localhost:8080/searchModels/xorg \
+  -d '{
+  "query": {
+    "match_all": {}
+  }
+}'
+```
+
+[Ack]: https://godoc.org/github.com/txn2/ack#Ack
+[Result]: https://godoc.org/github.com/txn2/es#Result
+[Model]: https://godoc.org/github.com/txn2/tm#Model
+[ModelSearchResultsAck]: https://godoc.org/github.com/txn2/tm#ModelSearchResultsAck
+[ModelResultAck]: https://godoc.org/github.com/txn2/tm#ModelResultAck
 
 ## Release Packaging
 
