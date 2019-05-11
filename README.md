@@ -5,8 +5,10 @@
 [![Docker Container Image Size](https://shields.beevelop.com/docker/image/image-size/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
 [![Docker Container Layers](https://shields.beevelop.com/docker/image/layers/txn2/tm/latest.svg)](https://hub.docker.com/r/txn2/tm/)
 
+The tm librarys defines type of generic nested meta-data [Model]. The tm server creates a services for the storage,
+retrieval and searching of [Model]s associated with a [txn2/provision](https://github.com/txn2/provision) [Account].
 
-TXN2 types model API
+[Account]: https://godoc.org/github.com/txn2/provision#Account
 
 ## Configuration
 
