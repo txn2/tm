@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/txn2/ack"
@@ -63,6 +64,21 @@ func NewApi(cfg *Config) (*Api, error) {
 			HttpClient:    cfg.HttpClient.Http,
 			ElasticServer: cfg.ElasticServer,
 		})
+	}
+
+	// check for elasticsearch
+	backOff := []int{10, 10, 15, 15, 30, 30, 45}
+	for _, boff := range backOff {
+		code, _, _ := a.Elastic.Get("")
+		a.Logger.Info("Attempting to contact Elasticsearch", zap.String("server", a.Elastic.ElasticServer))
+
+		if code == 200 {
+			a.Logger.Info("Connection to Elastic search successful.", zap.String("server", a.Elastic.ElasticServer))
+			break
+		}
+
+		a.Logger.Warn("Unable to contact Elasticsearch rolling back off.", zap.Int("wait_seconds", boff))
+		<-time.After(time.Duration(boff) * time.Second)
 	}
 
 	// send template mappings for models index
