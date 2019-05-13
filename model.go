@@ -30,7 +30,7 @@ type Model struct {
 	Description string `json:"description" mapstructure:"description"`
 
 	// default value expressed as a string
-	DefaultValue string `json:"default_value" mapstructure:"default_value"`
+	DefaultValue interface{} `json:"default_value" mapstructure:"default_value"`
 
 	// integer, float, date, binary, text and keyword
 	DataType string `json:"data_type" mapstructure:"data_type"`
