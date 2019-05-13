@@ -29,6 +29,9 @@ type Model struct {
 	// full documentation in markdown
 	Description string `json:"description" mapstructure:"description"`
 
+	// default value expressed as a string
+	DefaultValue string `json:"default_value" mapstructure:"default_value"`
+
 	// integer, float, date, binary, text and keyword
 	DataType string `json:"data_type" mapstructure:"data_type"`
 
@@ -139,6 +142,9 @@ func GetModelsTemplateMapping() es.IndexTemplate {
 		},
 		"description": es.Obj{
 			"type": "text",
+		},
+		"default_value": es.Obj{
+			"type": "keyword",
 		},
 		"data_type": es.Obj{
 			"type": "keyword",
