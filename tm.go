@@ -93,7 +93,15 @@ func NewApi(cfg *Config) (*Api, error) {
 // GetModel
 func (a *Api) GetModel(account string, id string) (int, *ModelResult, error) {
 
-	code, ret, err := a.Elastic.Get(fmt.Sprintf("%s-%s/_doc/%s", account, IdxModel, id))
+	locFmt := "%s-%s/_doc/%s"
+
+	// CONVENTION: if the account ends in an underscore "_" then
+	// it is a system model (SYSTEM_IdxModel)
+	if strings.HasSuffix(account, "_") {
+		locFmt = "%s%s/_doc/%s"
+	}
+
+	code, ret, err := a.Elastic.Get(fmt.Sprintf(locFmt, account, IdxModel, id))
 	if err != nil {
 		a.Logger.Error("EsError", zap.Error(err))
 		return code, nil, err
@@ -145,7 +153,15 @@ func (a *Api) UpsertModel(account string, model *Model) (int, es.Result, error) 
 		return code, templateMappingResult, err
 	}
 
-	return a.Elastic.PutObj(fmt.Sprintf("%s-%s/_doc/%s", account, IdxModel, model.MachineName), model)
+	locFmt := "%s-%s/_doc/%s"
+
+	// CONVENTION: if the account ends in an underscore "_" then
+	// it is a system model (SYSTEM_IdxModel)
+	if strings.HasSuffix(account, "_") {
+		locFmt = "%s%s/_doc/%s"
+	}
+
+	return a.Elastic.PutObj(fmt.Sprintf(locFmt, account, IdxModel, model.MachineName), model)
 }
 
 // UpsertModelHandler

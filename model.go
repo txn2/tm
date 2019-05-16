@@ -11,7 +11,11 @@
 
 package tm
 
-import "github.com/txn2/es"
+import (
+	"strings"
+
+	"github.com/txn2/es"
+)
 
 const IdxModel = "models"
 
@@ -89,22 +93,33 @@ func fieldProps(fields []Model) map[string]interface{} {
 func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 
 	name := account + "-data-" + model.MachineName
+	idxPattern := account + "-data-" + model.MachineName + "-*"
+
+	// CONVENTION: if the account ends in an underscore "_" then
+	// it is a system model (SYSTEM_IdxModel)
+	if strings.HasSuffix(account, "_") {
+		name = account + "system-data-" + model.MachineName
+		idxPattern = "*-data-" + model.MachineName + "-*"
+	}
 
 	payloadProps := fieldProps(model.Fields)
 
 	template := es.Obj{
-		"index_patterns": []string{account + "-data-" + model.MachineName + "-*"},
+		"index_patterns": []string{idxPattern},
 		"settings": es.Obj{
 			"index": es.Obj{
-				"number_of_shards": 3,
+				"number_of_shards": 1, // @TODO allow this to be configured
 			},
 		},
 		"mappings": es.Obj{
-			"doc": es.Obj{ // _doc is the standard until deprecated, logstash uses "doc"
+			// _doc is the standard until deprecated, logstash uses "doc"
+			// messages come into elasticsearch via txn2/rxtx->txn2/rtBeat->logstash
+			"doc": es.Obj{
 				"_source": es.Obj{
 					"enabled": true,
 				},
 				"properties": es.Obj{
+					// txn2/rtbeat sends txn2/rxtx messages as rxtxMsg
 					"rxtxMsg": es.Obj{
 						"properties": es.Obj{
 							"seq":      es.Obj{"type": "long"},
@@ -173,10 +188,10 @@ func GetModelsTemplateMapping() es.IndexTemplate {
 	}
 
 	template := es.Obj{
-		"index_patterns": []string{"*-" + IdxModel},
+		"index_patterns": []string{"*-" + IdxModel, "*_" + IdxModel},
 		"settings": es.Obj{
 			"index": es.Obj{
-				"number_of_shards": 2,
+				"number_of_shards": 1,
 			},
 		},
 		"mappings": es.Obj{
