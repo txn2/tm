@@ -98,7 +98,7 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 	// CONVENTION: if the account ends in an underscore "_" then
 	// it is a system model (SYSTEM_IdxModel)
 	if strings.HasSuffix(account, "_") {
-		name = account + "system-data-" + model.MachineName
+		name = account + IdxModel + "-data-" + model.MachineName
 		idxPattern = "*-data-" + model.MachineName + "-*"
 	}
 
