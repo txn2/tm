@@ -14,7 +14,7 @@ package tm
 import (
 	"strings"
 
-	"github.com/txn2/es"
+	"github.com/txn2/es/v2"
 )
 
 const IdxModel = "models"

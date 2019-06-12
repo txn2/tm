@@ -19,8 +19,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/txn2/ack"
-	"github.com/txn2/es"
+	"github.com/txn2/es/v2"
 	"github.com/txn2/micro"
 	"go.uber.org/zap"
 )
@@ -82,8 +83,12 @@ func NewApi(cfg *Config) (*Api, error) {
 	}
 
 	// send template mappings for models index
-	_, _, err := a.Elastic.SendEsMapping(GetModelsTemplateMapping())
+	_, _, errMessage, err := a.Elastic.SendEsMapping(GetModelsTemplateMapping())
 	if err != nil {
+		a.Logger.Error("NewApi error adding templates", zap.Error(err))
+		if errMessage != nil {
+			zap.String("es_error_response", errMessage.Message)
+		}
 		return nil, err
 	}
 
@@ -103,8 +108,12 @@ func (a *Api) GetModel(account string, id string) (int, *ModelResult, error) {
 
 	code, ret, err := a.Elastic.Get(fmt.Sprintf(locFmt, account, IdxModel, id))
 	if err != nil {
-		a.Logger.Error("EsError", zap.Error(err))
-		return code, nil, err
+		a.Logger.Error("EsError", zap.Error(err), zap.ByteString("returned_data", ret))
+		return code, nil, errors.New(err.Error() + " Elastic returned " + string(ret))
+	}
+
+	if code != 200 {
+		return code, nil, errors.New("Elastic returned " + string(ret))
 	}
 
 	modelResult := &ModelResult{}
@@ -144,13 +153,18 @@ func (a *Api) GetModelHandler(c *gin.Context) {
 }
 
 // UpsertModel
-func (a *Api) UpsertModel(account string, model *Model) (int, es.Result, error) {
+func (a *Api) UpsertModel(account string, model *Model) (int, es.Result, *es.ErrorResponse, error) {
 	a.Logger.Info("Upsert model record", zap.String("account", account), zap.String("machine_name", model.MachineName))
 
 	// send template mappings for models index
-	code, templateMappingResult, err := a.Elastic.SendEsMapping(MakeModelTemplateMapping(account, model))
+	code, templateMappingResult, errorResult, err := a.Elastic.SendEsMapping(MakeModelTemplateMapping(account, model))
+	if errorResult != nil {
+		a.Logger.Error("Elastic error result", zap.String("error_result", errorResult.Message))
+		return code, templateMappingResult, errorResult, err
+	}
 	if err != nil {
-		return code, templateMappingResult, err
+		a.Logger.Error("UpsertModel error", zap.Error(err))
+		return code, templateMappingResult, errorResult, err
 	}
 
 	locFmt := "%s-%s/_doc/%s"
@@ -185,11 +199,11 @@ func (a *Api) UpsertModelHandler(c *gin.Context) {
 	//ak.GinSend(MakeModelTemplateMapping(account, model))
 	//return
 
-	code, esResult, err := a.UpsertModel(account, model)
+	code, esResult, esErrorResult, err := a.UpsertModel(account, model)
 	if err != nil {
 		a.Logger.Error("Upsert failure.", zap.Error(err))
 		ak.SetPayloadType("ErrorMessage")
-		ak.SetPayload("there was a problem upserting the model")
+		ak.SetPayload("there was a problem upserting the model: " + esErrorResult.Message)
 		ak.GinErrorAbort(500, "UpsertError", err.Error())
 		return
 	}
@@ -198,7 +212,10 @@ func (a *Api) UpsertModelHandler(c *gin.Context) {
 		a.Logger.Error("Es returned a non 200")
 		ak.SetPayloadType("EsError")
 		ak.SetPayload(esResult)
-		ak.GinErrorAbort(500, "EsError", "Es returned a non 200")
+		if esErrorResult != nil {
+			ak.SetPayload(esErrorResult.Message)
+		}
+		ak.GinErrorAbort(code, "EsError", "Es returned a non 200")
 		return
 	}
 

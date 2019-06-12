@@ -1,14 +1,3 @@
-// Copyright 2019 txn2
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//     http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package tm
 
 import (
@@ -17,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/txn2/ack"
-	"github.com/txn2/es"
+	"github.com/txn2/es/v2"
 	"go.uber.org/zap"
 )
 
@@ -38,16 +27,19 @@ type ModelSearchResultsAck struct {
 }
 
 // SearchModels
-func (a *Api) SearchModels(account string, searchObj *es.Obj) (int, ModelSearchResults, error) {
+func (a *Api) SearchModels(account string, searchObj *es.Obj) (int, ModelSearchResults, *es.ErrorResponse, error) {
 	modelResults := &ModelSearchResults{}
 
-	code, err := a.Elastic.PostObjUnmarshal(fmt.Sprintf("%s-%s/_search", account, IdxModel), searchObj, modelResults)
+	code, errorResponse, err := a.Elastic.PostObjUnmarshal(fmt.Sprintf("%s-%s/_search", account, IdxModel), searchObj, modelResults)
 	if err != nil {
 		a.Logger.Error("EsError", zap.Error(err))
-		return code, *modelResults, err
+		if errorResponse != nil {
+			a.Logger.Error("EsErrorMessage", zap.String("es_error_message", errorResponse.Message))
+		}
+		return code, *modelResults, errorResponse, err
 	}
 
-	return code, *modelResults, nil
+	return code, *modelResults, nil, nil
 }
 
 // SearchAccountsHandler
@@ -65,17 +57,20 @@ func (a *Api) SearchModelsHandler(c *gin.Context) {
 	// upstream middleware to protect account access.
 	account := c.Param("account")
 
-	code, esResult, err := a.SearchModels(account, obj)
+	code, esResult, errorResponse, err := a.SearchModels(account, obj)
 	if err != nil {
 		a.Logger.Error("EsError", zap.Error(err))
 		ak.SetPayloadType("EsError")
 		ak.SetPayload("Error communicating with database.")
-		ak.GinErrorAbort(500, "EsError", err.Error())
+		if errorResponse != nil {
+			ak.SetPayload(errorResponse.Message)
+		}
+		ak.GinErrorAbort(code, "EsError", err.Error())
 		return
 	}
 
 	if code >= 400 && code < 500 {
-		ak.SetPayload(esResult)
+		ak.SetPayload(errorResponse)
 		ak.GinErrorAbort(500, "SearchError", "There was a problem searching")
 		return
 	}

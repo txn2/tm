@@ -10,12 +10,14 @@ require (
 	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/prometheus/common v0.3.0 // indirect
 	github.com/prometheus/procfs v0.0.0-20190412120340-e22ddced7142 // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/txn2/ack v1.8.3
 	github.com/txn2/es v1.3.5
+	github.com/txn2/es/v2 v2.0.1
 	github.com/txn2/micro v0.0.6
 	github.com/txn2/provision v0.1.6
 	go.uber.org/zap v1.10.0
