@@ -1,14 +1,3 @@
-// Copyright 2019 txn2
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//     http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package tm
 
 import (
@@ -23,6 +12,9 @@ const IdxModel = "models"
 type Model struct {
 	// MachineName is a lowercase under score delimited uniq id
 	MachineName string `json:"machine_name" mapstructure:"machine_name"`
+
+	// AliasOf is the machine name of a model this model is an alias of.
+	AliasOf string `json:"alias_of" mapstructure:"alias_of"`
 
 	// short human readable display name
 	DisplayName string `json:"display_name" mapstructure:"display_name"`
@@ -147,7 +139,10 @@ func MakeModelTemplateMapping(account string, model *Model) es.IndexTemplate {
 func GetModelsTemplateMapping() es.IndexTemplate {
 	properties := es.Obj{
 		"machine_name": es.Obj{
-			"type": "text",
+			"type": "keyword",
+		},
+		"alias_of": es.Obj{
+			"type": "keyword",
 		},
 		"display_name": es.Obj{
 			"type": "text",

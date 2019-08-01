@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/txn2/ack v1.8.3
 	github.com/txn2/es v1.3.5
-	github.com/txn2/es/v2 v2.0.1
+	github.com/txn2/es/v2 v2.0.2
 	github.com/txn2/micro v0.0.6
 	github.com/txn2/provision v0.1.6
 	go.uber.org/zap v1.10.0
