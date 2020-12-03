@@ -34,7 +34,7 @@ following configuration is specific to **tm**:
 
 | Method | Route Pattern                           | Description                                          |
 |:-------|:----------------------------------------|:-----------------------------------------------------|
-| POST   | [/model/:account](#upsert-model)        | Upset a model into an account.                       |
+| POST   | [/model/:account](#upsert-model)        | Upsert a model into an account.                      |
 | GET    | [/model/:account/:id](#get-model)       | Get a model by account and id.                       |
 | POST   | [searchModels/:account](#search-models) | Search for models in an account with a Lucene query. |
 
