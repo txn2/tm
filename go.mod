@@ -3,10 +3,9 @@ module github.com/txn2/tm
 go 1.12
 
 require (
-	github.com/gin-gonic/gin v1.3.0
+	github.com/gin-gonic/gin v1.7.3
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
-	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
