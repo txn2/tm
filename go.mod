@@ -3,7 +3,7 @@ module github.com/txn2/tm
 go 1.12
 
 require (
-	github.com/gin-gonic/gin v1.7.3
+	github.com/gin-gonic/gin v1.7.7
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/common v0.3.0 // indirect
