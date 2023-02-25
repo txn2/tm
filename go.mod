@@ -13,6 +13,6 @@ require (
 	github.com/txn2/micro v0.0.6
 	github.com/txn2/provision v0.1.6
 	go.uber.org/zap v1.10.0
-	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
